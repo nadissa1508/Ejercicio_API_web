@@ -93,6 +93,8 @@ app.get('/', (req, res) => {
 
 //crear un reporte
 
+/*
+
 app.post('/incidents', (req, res) => {
     let { employee_id, equipment_id, description, status = "PENDIENTE" } = req.body;
     //logica para verificar que description sea minimo de 10 caracteres
@@ -112,7 +114,7 @@ app.post('/incidents', (req, res) => {
         res.status(400).json({ error: 'Estatus del reporte invalido'})
         return
     }
-    */
+    
     db.run("insert into Incident (employee_id, equipment_id, description, status) values(?,?,?,?)", [employee_id, equipment_id, description, status], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -122,8 +124,17 @@ app.post('/incidents', (req, res) => {
     });
 }
 );
+*/
+
+app.post('/incidents', (req, res) => {
+    console.log('Datos recibidos:', req.body); 
+    res.json({ mensaje: 'Si funciona :DD', datos: req.body });
+});
+
 
 //obtener todos los incidentes
+
+/*
 
 app.get('/incidents', (req, res) => {
 
@@ -155,7 +166,11 @@ app.get('/incidents/:id', (req, res) => {
         res.json({ incidents: rows });
     });
 });
+*/
 
+app.get('/incidents', (req, res) => {
+    res.send('Hola Mundo');
+});
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
