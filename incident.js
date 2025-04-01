@@ -11,32 +11,8 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 3000; 
 
-//conexion a mysql
-
-const mysql = require ('mysql');
-
-const cn = mysql.createConnection({
-    // host: 'localhost', -> este era el original, verificar
-    host: port,
-    user: 'root',
-    password: '$Buho$3002!',
-    database: 'tickets_incidents'
-});
-
-//conexion a la db
-
-cn.connect((error)=>{
-    if(error){
-    console.error('Error conectando a mysql :(', error);
-    }else{
-    console.log('Conectado a MySQL! :)');
-    }
-    });
-
-// ver en donde poner esto  
-// cn.end();
-
-const db = require ('tickets_incidents_db');
+//traer la db
+const db = require ('./tickets_incidents_db');
 db.startDB();
 
 app.use(cors());
@@ -122,9 +98,10 @@ app.get('/', (req, res) => {
 //crear un reporte
 
 app.post('/incidents', (req, res) => {
-    let { employee_id, equipment_id, description, status = "PENDIENTE" } = req.body;
+    let { employee_id, equipment_id, description} = req.body;
+
     //logica para verificar que description sea minimo de 10 caracteres
-    if (description.trim().length <= 9 || !description ) {
+    if (description.trim().length < 10 || !description ) {
         res.status(400).json({ error: 'La descripción debe tener al menos 10 caracteres' });
         return
     }
@@ -134,12 +111,17 @@ app.post('/incidents', (req, res) => {
         return
     }
 
-    cn.query("insert into Incident (employee_id, equipment_id, description, status) values(?,?,?,?)", [employee_id, equipment_id, description, status], function (err, result) {
+    if (equipment_id === undefined) {
+        res.status(400).json({ error: 'Debe ingresar el ID del equipo del que se hace el reporte' });
+        return
+    }
+
+    db.cn.query("insert into Incident (employee_id, equipment_id, description) values(?,?,?)", [employee_id, equipment_id, description], function (err, result) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
         }
-        res.json({ success: true });
+        res.json({ success: true, message: "Incidente creado exitosamente"});
     });
 }
 );
@@ -148,7 +130,7 @@ app.post('/incidents', (req, res) => {
 
 app.get('/incidents', (req, res) => {
 
-    cn.query("SELECT (e.name || ' ' || e.lastname) AS reporter, eq.equipment, i.description, i.status, i.created_at FROM Incident AS i JOIN Employee AS e ON i.employee_id = e.id JOIN Equipment AS eq ON i.equipment_id = eq.id", (err, rows) => {
+    db.cn.query("SELECT  CONCAT(e.name, ' ', e.lastname) AS reporter, eq.equipment, i.description, i.status, i.created_at FROM Incident AS i JOIN Employee AS e ON i.employee_id = e.id JOIN Equipment AS eq ON i.equipment_id = eq.id", (err, rows) => {
         if (err) {
             res.status(404).json({ error: err.message });
             return;
@@ -166,11 +148,11 @@ app.get('/incidents/:id', (req, res) => {
         return res.status(400).json({ error: 'El ID debe ser un número' });
     }
     
-    cn.query("SELECT (e.name || ' ' || e.lastname) AS reporter, eq.equipment, i.description, i.status, i.created_at FROM Incident AS i JOIN Employee AS e ON i.employee_id = e.id JOIN Equipment AS eq ON i.equipment_id = eq.id WHERE i.id = ?", [incident_id], (err, rows) => {
+    db.cn.query("SELECT  CONCAT(e.name, ' ', e.lastname) AS reporter, eq.equipment, i.description, i.status, i.created_at FROM Incident AS i JOIN Employee AS e ON i.employee_id = e.id JOIN Equipment AS eq ON i.equipment_id = eq.id WHERE i.id = ?", [incident_id], (err, rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
-        if (!row) {
+        if (rows.length === 0) {
             return res.status(404).json({ error: 'Incidente no encontrado' });
         }
         res.json({ incidents: rows });
@@ -180,31 +162,36 @@ app.get('/incidents/:id', (req, res) => {
 // actualizar el estado de un incidente
 
 app.put('/incidents/:id', (req, res) =>{
-    const { id, status} = req.body;
+    const { status } = req.body;
+    const incident_id = req.params.id;
 
     if (status !== 'PENDIENTE' && status !== 'EN PROCESO' && status !== 'RESUELTO') {
         res.status(400).json({ error: 'Estatus del reporte invalido'})
         return
     }
-    cn.query("UPDATE Incident set status = ?  WHERE id = ?", status, id, function (err) {
+    db.cn.query("UPDATE Incident set status = ?  WHERE id = ?", [status, incident_id], (err, result) => {
         if (err) {
-            res.status(500).json({ error: err.message });
-            return;
+            return res.status(500).json({ error: err.message });
         }
-        res.json({ success: true });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Incidente no encontrado' });
+        }
+        res.json({ success: true, message: "Estado actualizado correctamente" });
     });
 })
 
 // eliminar un incidente por id
 
 app.delete('/incidents/:id', (req, res) =>{
-    const id = req.params.id;
-    cn.query("DELETE FROM Incident WHERE id = ?", id, function (err) {
+    const incident_id = req.params.id;
+    db.cn.query("DELETE FROM Incident WHERE id = ?", [incident_id],  (err, result) => {
         if (err) {
-            res.status(500).json({ error: err.message });
-            return;
+            return res.status(500).json({ error: err.message });
         }
-        res.json({ success: true });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Incidente no encontrado' });
+        }
+        res.json({ success: true, message: "Incidente eliminado correctamente" });
     });
 })
 
