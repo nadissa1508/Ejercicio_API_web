@@ -1,4 +1,3 @@
-//minimo get y post
 
 const cors = require('cors'); 
 const express = require('express');
@@ -93,8 +92,6 @@ app.get('/', (req, res) => {
 
 //crear un reporte
 
-/*
-
 app.post('/incidents', (req, res) => {
     let { employee_id, equipment_id, description, status = "PENDIENTE" } = req.body;
     //logica para verificar que description sea minimo de 10 caracteres
@@ -114,7 +111,7 @@ app.post('/incidents', (req, res) => {
         res.status(400).json({ error: 'Estatus del reporte invalido'})
         return
     }
-    
+    */
     db.run("insert into Incident (employee_id, equipment_id, description, status) values(?,?,?,?)", [employee_id, equipment_id, description, status], function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -124,17 +121,8 @@ app.post('/incidents', (req, res) => {
     });
 }
 );
-*/
-
-app.post('/incidents', (req, res) => {
-    console.log('Datos recibidos:', req.body); 
-    res.json({ mensaje: 'Si funciona :DD', datos: req.body });
-});
-
 
 //obtener todos los incidentes
-
-/*
 
 app.get('/incidents', (req, res) => {
 
@@ -156,7 +144,7 @@ app.get('/incidents/:id', (req, res) => {
         return res.status(400).json({ error: 'El ID debe ser un número' });
     }
     
-    db.get("SELECT (e.name || ' ' || e.lastname) AS reporter, eq.equipment, i.description, i.status, i.created_at FROM Incident AS i JOIN Employee AS e ON i.employee_id = e.id JOIN Equipment AS eq ON i.equipment_id = eq.id WHERE i.id = ?", [incident_id], (err, rows) => {
+    db.run("SELECT (e.name || ' ' || e.lastname) AS reporter, eq.equipment, i.description, i.status, i.created_at FROM Incident AS i JOIN Employee AS e ON i.employee_id = e.id JOIN Equipment AS eq ON i.equipment_id = eq.id WHERE i.id = ?", [incident_id], (err, rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -166,11 +154,33 @@ app.get('/incidents/:id', (req, res) => {
         res.json({ incidents: rows });
     });
 });
-*/
 
-app.get('/incidents', (req, res) => {
-    res.send('Hola Mundo');
-});
+// actualizar el estado de un incidente
+
+app.put('/incidents/:id', (req, res) =>{
+    const { id, status} = req.body;
+    db.run("UPDATE status FROM Incident WHERE id = ?", id, function (err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({ success: true });
+    });
+})
+
+// eliminar un incidente por id
+
+app.delete('/incidents/:id', (req, res) =>{
+    const id = req.params.id;
+    db.run("DELETE FROM Incident WHERE id = ?", id, function (err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({ success: true });
+    });
+})
+
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
