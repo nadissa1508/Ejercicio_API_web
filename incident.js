@@ -1,3 +1,9 @@
+/*
+ * Referencias de la conexión a la base de datos
+ * https://blogs.perficient.com/2023/08/03/how-to-connect-node-js-with-mysql-database/
+ * https://www.w3schools.com/nodejs/nodejs_mysql.asp 
+ */
+
 
 const cors = require('cors'); 
 const express = require('express');
@@ -5,10 +11,33 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 3000; 
 
-/*
-const startDB = require('./db/database');
-const db = startDB();
-*/
+//conexion a mysql
+
+const mysql = require ('mysql');
+
+const cn = mysql.createConnection({
+    // host: 'localhost', -> este era el original, verificar
+    host: port,
+    user: 'root',
+    password: '$Buho$3002!',
+    database: 'tickets_incidents'
+});
+
+//conexion a la db
+
+cn.connect((error)=>{
+    if(error){
+    console.error('Error conectando a mysql :(', error);
+    }else{
+    console.log('Conectado a MySQL! :)');
+    }
+    });
+
+// ver en donde poner esto  
+// cn.end();
+
+const db = require ('tickets_incidents_db');
+db.startDB();
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -105,14 +134,7 @@ app.post('/incidents', (req, res) => {
         return
     }
 
-    /*
-    Esta validación iria en el actualizar status
-    if (status !== 'PENDIENTE' && status !== 'EN PROCESO' && status !== 'RESUELTO') {
-        res.status(400).json({ error: 'Estatus del reporte invalido'})
-        return
-    }
-    */
-    db.run("insert into Incident (employee_id, equipment_id, description, status) values(?,?,?,?)", [employee_id, equipment_id, description, status], function (err) {
+    cn.query("insert into Incident (employee_id, equipment_id, description, status) values(?,?,?,?)", [employee_id, equipment_id, description, status], function (err, result) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -126,7 +148,7 @@ app.post('/incidents', (req, res) => {
 
 app.get('/incidents', (req, res) => {
 
-    db.all("SELECT (e.name || ' ' || e.lastname) AS reporter, eq.equipment, i.description, i.status, i.created_at FROM Incident AS i JOIN Employee AS e ON i.employee_id = e.id JOIN Equipment AS eq ON i.equipment_id = eq.id", (err, rows) => {
+    cn.query("SELECT (e.name || ' ' || e.lastname) AS reporter, eq.equipment, i.description, i.status, i.created_at FROM Incident AS i JOIN Employee AS e ON i.employee_id = e.id JOIN Equipment AS eq ON i.equipment_id = eq.id", (err, rows) => {
         if (err) {
             res.status(404).json({ error: err.message });
             return;
@@ -144,7 +166,7 @@ app.get('/incidents/:id', (req, res) => {
         return res.status(400).json({ error: 'El ID debe ser un número' });
     }
     
-    db.run("SELECT (e.name || ' ' || e.lastname) AS reporter, eq.equipment, i.description, i.status, i.created_at FROM Incident AS i JOIN Employee AS e ON i.employee_id = e.id JOIN Equipment AS eq ON i.equipment_id = eq.id WHERE i.id = ?", [incident_id], (err, rows) => {
+    cn.query("SELECT (e.name || ' ' || e.lastname) AS reporter, eq.equipment, i.description, i.status, i.created_at FROM Incident AS i JOIN Employee AS e ON i.employee_id = e.id JOIN Equipment AS eq ON i.equipment_id = eq.id WHERE i.id = ?", [incident_id], (err, rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -159,7 +181,12 @@ app.get('/incidents/:id', (req, res) => {
 
 app.put('/incidents/:id', (req, res) =>{
     const { id, status} = req.body;
-    db.run("UPDATE status FROM Incident WHERE id = ?", id, function (err) {
+
+    if (status !== 'PENDIENTE' && status !== 'EN PROCESO' && status !== 'RESUELTO') {
+        res.status(400).json({ error: 'Estatus del reporte invalido'})
+        return
+    }
+    cn.query("UPDATE Incident set status = ?  WHERE id = ?", status, id, function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -172,7 +199,7 @@ app.put('/incidents/:id', (req, res) =>{
 
 app.delete('/incidents/:id', (req, res) =>{
     const id = req.params.id;
-    db.run("DELETE FROM Incident WHERE id = ?", id, function (err) {
+    cn.query("DELETE FROM Incident WHERE id = ?", id, function (err) {
         if (err) {
             res.status(500).json({ error: err.message });
             return;

@@ -13,3 +13,6 @@ node incident.js
 
 control + click para abrir el url
 
+*provisionalmente*
+
+npm install mysql
