@@ -9,7 +9,7 @@ DB -> MYSQL
 instrucciones para ejecutar la API
 
 npm install
-npm install mysql
+npm install mysql2
 node incident.js
 
 control + click para abrir el url
