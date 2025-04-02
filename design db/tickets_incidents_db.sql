@@ -1,0 +1,22 @@
+
+CREATE TABLE IF NOT EXISTS Employee (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    lastname VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Equipment (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    equipment VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Incident (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id INT NOT NULL,
+    equipment_id INT NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    status ENUM('PENDIENTE', 'EN PROCESO', 'RESUELTO') NOT NULL DEFAULT 'PENDIENTE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (employee_id) REFERENCES Employee (id),
+    FOREIGN KEY (equipment_id) REFERENCES Equipment (id)
+);
