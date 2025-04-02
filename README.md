@@ -6,9 +6,14 @@ Las tecnologías que estoy utilizando para el laboratorio:
 API -> Node.js
 DB -> MYSQL
 
-instrucciones para ejecutar la API
+Para ejecutar el programa se deben de tener instaladas
+estas tecnologías en la pc.
 
-npm install
+Instrucciones para ejecutar la API
+
+npm init -y
+npm install express
+npm install cors
 npm install mysql2
 node incident.js
 
