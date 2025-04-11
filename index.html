@@ -1,0 +1,72 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Gestión de Incidentes</title>
+        <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 20px;
+                }
+                h1 {
+                    color: #333;
+                }
+                ul {
+                    list-style-type: none;
+                    padding: 0;
+                }
+                li {
+                    margin: 10px 0;
+                }
+                a {
+                    text-decoration: none;
+                    color: #007BFF;
+                    font-weight: bold;
+                }
+                a:hover {
+                    text-decoration: underline;
+                }
+                .container {
+                    max-width: 800px;
+                    margin: 0 auto;
+                    background: #fff;
+                    padding: 20px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    border-radius: 8px;
+                }
+                .description {
+                    color: #555;
+                    font-size: 14px;
+                }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Gestión de Incidentes</h1>
+            <ul>
+                <li>
+                    <a href="pages/post_incident.html">Crear reporte</a>
+                    <p class="description">Agregar un reporte de un equipo.</p>
+                </li>
+                <li>
+                    <a href="pages/get_incident.html">Consultar incidente</a>
+                    <p class="description">Permite consultar los incidentes reportados.</p>
+                </li>
+                <li>
+                    <a href="pages/get_incident.html">Consultar incidente específico</a>
+                    <p class="description">Permite consultar un incidente según su ID.</p>
+                </li>
+                <li>
+                    <a href="pages/update_status.html">Actualizar estado de un incidente</a>
+                    <p class="description">Actualizar el estado de un reporte según su ID.</p>
+                </li>
+                <li>
+                    <a href="pages/delete_incident.html">Eliminar un reporte</a>
+                    <p class="description">Eliminar un reporte según su ID.</p>
+                </li>
+            </ul>
+        </div>
+        <script type="module" src="./incident.js"></script>
+    </body>
+</html>

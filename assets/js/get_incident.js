@@ -23,9 +23,9 @@ function createElements(){
     thead.appendChild(tr);
     table.appendChild(thead);
 
-    document.appendChild(title);
-    document.appendChild(search_bar);
-    document.appendChild(table);
+    document.body.appendChild(title);
+    document.body.appendChild(search_bar);
+    document.body.appendChild(table);
 }
 
 function addStyle(){
@@ -33,6 +33,10 @@ function addStyle(){
 }
 
 function getIncidents(id){
+    const table = document.getElementById('table');        
+    const oldTbody = table.querySelector("tbody");
+    if (oldTbody) table.removeChild(oldTbody);
+
     let url = "";
 
     if (id === undefined){
@@ -44,37 +48,29 @@ function getIncidents(id){
     fetch(url)
         .then(response => response.json())
         .then(data => {
-            const table = document.getElementById('table');
-            postContainer.innerHTML = '';
+            
+            const incidents = data.incidents;
 
-            // filtrar segun  la barra de busqueda
-            let filtIncidents;
+            let tbody = document.createElement("tbody");
 
-            if(id){
-                filtIncidents = data.incidents.filter(inc => inc.id.includes(id));
-            }else{
-                filtIncidents = data.incidents;
-            }
-        
-            filtIncidents.forEach(incident => {
-                let tbody = document.createElement("tbody");
+            incidents.forEach(incident => {
+                let tr = document.createElement("tr");
 
-                filtIncidents.forEach(incident => {
-                    let tr = document.createElement("tr");
-
-                    ["id", "reporter", "equipment", "description", "status", "created_at"].forEach(key => {
-                        let td = document.createElement("td");
-                        td.textContent = incident[key];
-                        tr.appendChild(td);
-                    });
-
-                    tbody.appendChild(tr);
+                ["id", "reporter", "equipment", "description", "status", "created_at"].forEach(key => {
+                    let td = document.createElement("td");
+                    td.textContent = incident[key];
+                    tr.appendChild(td);
                 });
 
-                table.appendChild(tbody);
+                tbody.appendChild(tr);
             });
-    })
-    .catch(error => console.error('Error fetching incidents:', error));
+
+            table.appendChild(tbody);
+        })
+        .catch(error => {
+            console.error('Error fetching incidents:', error);
+            alert("Error al mostrar incidentes");
+        });
 }
 
 function main (){
@@ -87,4 +83,8 @@ function main (){
     search_bar.addEventListener("input", () => 
         getIncidents(search_bar.value)
     );
+
+    getIncidents();
 }
+
+main();

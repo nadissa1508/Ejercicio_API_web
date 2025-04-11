@@ -20,7 +20,7 @@ function createElements(){
 
     let input_id_equipment = document.createElement("input");
     input_id_equipment.id = "id_equipment";
-    input_id_equipment.placeholder = "Ingrese el estado del incidente:";
+    input_id_equipment.placeholder = "Ingrese ID del equipo:";
     input_id_equipment.type = "number"; 
 
     let label3 = document.createElement("label");
@@ -28,13 +28,16 @@ function createElements(){
 
     let input_description = document.createElement("input");
     input_description.id = "description";
-    input_description.placeholder = "Ingrese el estado del incidente:";
-    input_description.type = "text"; 
+    input_description.placeholder = "Ingrese la descripción del incidente:";
+    input_description.type = "text";
+    input_description.rows = 4; 
+    input_description.cols = 50;  
 
 
     let submit_button = document.createElement("button");
     submit_button.id = "submit_button";
     submit_button.textContent = "Enviar";
+    submit_button.type = "button";
 
     form.appendChild(label1);
     form.appendChild(input_id_employee);
@@ -78,6 +81,7 @@ function postIncident(employee_id, equipment_id, description){
     })
     .catch(error => {
         console.error("Error al crear incidente", error);
+        alert("Error al crear incidente");
     });
 }
 
@@ -91,8 +95,12 @@ function main (){
     let input_description = document.getElementById("description");
     let button = document.getElementById("submit_button"); 
 
-    button.addEventListener("click", () => 
-        postIncident(input_id_employee.value , input_id_equipment.value, input_description.value)
-    );
+    button.addEventListener("click", () => {
+        postIncident(input_id_employee.value , input_id_equipment.value, input_description.value);
+        input_id_employee.value = "";
+        input_id_equipment.value = "";
+        input_description.value = "";
+    });
 }
 
+main();
