@@ -7,16 +7,21 @@ function createElements(){
     let input_id = document.createElement("input");
     input_id.id = "input_id";
     input_id.placeholder = "Ingrese el ID del incidente:";
-    input_id.type = "text"; //cambiar esto a number
+    input_id.type = "number"; 
 
     let input_status = document.createElement("input");
     input_status.id = "input_status";
     input_status.placeholder = "Ingrese el estado del incidente:";
-    input_status.type = "text"; //cambiar esto a number
+    input_status.type = "number"; 
 
     let update_button = document.createElement("button");
     update_button.id = "update_button";
     update_button.textContent = "Actualizar";
+
+    document.appendChild(title);
+    document.appendChild(input_id);
+    document.appendChild(input_status);
+    document.appendChild(update_button);
 
 }
 
@@ -25,7 +30,7 @@ function addStyle(){
 }
 
 function updateStatus(id, incident_status){
-    fetch(`http://localhost:3000/incidents/:${id}`, {
+    fetch(`http://localhost:3000/incidents/${id}`, {
         method: "PUT",
 
         body: JSON.stringify({
@@ -56,6 +61,6 @@ function main (){
     let button = document.getElementById("update_button"); 
 
     button.addEventListener("click", () => 
-        updateStatus(input_id.textContent, input_status.textContent)
+        updateStatus(input_id.value, input_status.value)
     );
 }

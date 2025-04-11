@@ -8,13 +8,15 @@ function createElements(){
     let input_id = document.createElement("input");
     input_id.id = "input_id";
     input_id.placeholder = "Ingrese el ID del incidente:";
-    input_id.type = "text"; //cambiar esto a number
+    input_id.type = "number"; 
 
     let delete_button = document.createElement("button");
     delete_button.id = "delete_button";
     delete_button.textContent = "Eliminar";
 
-            
+    document.appendChild(title);
+    document.appendChild(input_id);
+    document.appendChild(delete_button); 
 }
 
 function addStyle(){
@@ -22,7 +24,7 @@ function addStyle(){
 }
 
 function deleteIncident(id){
-    fetch(`http://localhost:3000/incidents/:${id}`, {
+    fetch(`http://localhost:3000/incidents/${id}`, {
         method: "DELETE",
         headers: {
             "Content-type": "application/json; charset=UTF-8"
@@ -47,6 +49,6 @@ function main (){
     let button = document.getElementById("delete_button"); 
 
     button.addEventListener("click", () => 
-        deleteIncident(input_id.textContent)
+        deleteIncident(input_id.value)
     );
 }
