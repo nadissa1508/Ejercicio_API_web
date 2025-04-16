@@ -52,7 +52,7 @@ async function getIncidents(id){
 
         let tbody = document.createElement("tbody");
 
-        const incidents = Array.isArray(data.incidents) ? data.incidents : [data.incidents];
+        const incidents = data.incidents ?? (data.incident ? [data.incident] : []);
 
         incidents.forEach(incident => {
             let tr = document.createElement("tr");
