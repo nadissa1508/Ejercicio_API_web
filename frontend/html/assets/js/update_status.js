@@ -26,44 +26,43 @@ function createElements(){
 
 }
 
-function addStyle(){
+async function updateStatus(id, incident_status){
+    try {
+        const response = await fetch(`http://localhost:3001/incidents/${id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                status: incident_status
+            }),
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
+        });
 
-}
+        const data = await response.json();
 
-function updateStatus(id, incident_status){
-    fetch(`http://localhost:3000/incidents/${id}`, {
-        method: "PUT",
-
-        body: JSON.stringify({
-            status: incident_status,
-        }),
-
-        headers: {
-            "Content-type": "application/json; charset=UTF-8"
+        if (!response.ok) {
+            throw new Error(data.error || "Error al actualizar estado");
         }
-    })
 
-    .then(response => response.json())
-    .then(data => {
-        console.log(`Estado del incidente ID ${id} actualizado!`, data);
-        alert("Estado del incidente actualizado!");
-    })
-    .catch(error => {
-        console.error("Error al actualizar estado", error);
-        alert("Error al actualizar estado");
-    });
+        console.log(`Estado del incidente actualizado:`, data);
+        alert(`¡Estado actualizado correctamente a ${incident_status}!`);
+        return true;
+    } catch (error) {
+        console.error("Error al actualizar estado:", error);
+        alert(`Error al actualizar el estado`);
+        return false;
+    }
 }
 
 function main (){
 
     createElements();
-    addStyle();
 
     let input_id = document.getElementById("input_id");
     let input_status = document.getElementById("input_status");
     let button = document.getElementById("update_button"); 
 
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
         let id = input_id.value.trim();
         let status = input_status.value.trim();
 
@@ -71,9 +70,12 @@ function main (){
             alert("Por favor complete todos los campos.");
             return;
         }
-        updateStatus(id, status);
-        input_id.value = "";
-        input_status.value = "";
+        const flag = await updateStatus(id, status);
+        
+        if (flag) {
+            input_id.value = "";
+            input_status.value = "";
+        }
     });
 }
 

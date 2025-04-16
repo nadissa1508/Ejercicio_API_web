@@ -20,49 +20,53 @@ function createElements(){
     document.body.appendChild(delete_button); 
 }
 
-function addStyle(){
-
-}
-
-function deleteIncident(id){
+async function deleteIncident(id){
     if (!confirm(`¿Estás seguro de que querés eliminar el incidente con ID ${id}?`)) return;
 
-    fetch(`http://localhost:3000/incidents/${id}`, {
-        method: "DELETE",
-        headers: {
-            "Content-type": "application/json; charset=UTF-8"
+    try {
+        const response = await fetch(`http://localhost:3001/incidents/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Error al eliminar incidente");
         }
-    })
-    
-    .then(response => response.json())
-    .then(data => {
-        console.log("Incidente eliminado", data);
-        alert("Incidente eliminado");
-    })
-    .catch(error => {
-        console.error("Error al eliminar incidente", error);
-        alert("Error al eliminar incidente");
-    });
+
+        console.log("Incidente eliminado:", data);
+        alert(`Incidente eliminado correctamente`);
+        return true;
+    } catch (error) {
+        console.error("Error al eliminar incidente:", error);
+        alert(`Error al eliminar incidente`);
+        return false;
+    }
 }
 
 function main (){
 
     createElements();
-    addStyle();
     
     let input_id = document.getElementById("input_id");
     let button = document.getElementById("delete_button"); 
 
 
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
         const id = input_id.value.trim();
 
         if (!id) {
             alert("Por favor ingrese un ID válido.");
             return;
         }
-        deleteIncident(id);
-        input_id = "";
+        const success = await deleteIncident(id);
+        
+        if (success) {
+            input_id.value = ""; 
+        }
     });
 }
 
